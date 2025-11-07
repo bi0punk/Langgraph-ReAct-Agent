@@ -1,0 +1,22 @@
+# Núcleo agente
+langgraph>=0.2.30
+langchain>=0.3.7
+langchain-openai>=0.2.5
+langchain-community>=0.3.7
+
+# RAG
+faiss-cpu>=1.8.0.post1
+pypdf>=4.2.0
+
+# Config / utilidades
+python-dotenv>=1.0.1
+pyyaml>=6.0.2
+
+# API opcional
+fastapi>=0.115.0
+uvicorn>=0.30.6
+
+# Dev opcional
+ruff>=0.6.8
+black>=24.8.0
+pytest>=8.2.0

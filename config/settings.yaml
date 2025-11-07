@@ -1,0 +1,39 @@
+app:
+  name: agent-project
+  env: dev
+
+paths:
+  manuals_dir: ./data/manuales
+  index_dir: ./data/rag_index
+  checkpoint_db: ./data/checkpoints.sqlite
+
+llm:
+  chat_model: gpt-4o-mini
+  temperature: 0.0          # <-- número real, no string con ${...}
+  request_timeout: 60       # <-- número
+
+embeddings:
+  model: text-embedding-3-small
+
+rag:
+  top_k: 4
+  chunk_size: 1000
+  chunk_overlap: 150
+
+graph:
+  max_steps: 6
+  rag_mode: both            # none | auto | both
+
+memory:
+  checkpointer: memory      # memory | sqlite
+
+logging:
+  config_file: ./config/logging.yaml
+  level: INFO
+
+
+# | Modo   | Comportamiento                                                           |
+# | ------ | ------------------------------------------------------------------------ |
+# | `none` | El agente **solo usa RAG cuando explícitamente llama a `manual_search`** |
+# | `auto` | Siempre intenta buscar en manuales antes del LLM                         |
+# | `both` | Hace RAG automático **y** mantiene la herramienta manual_search          |
