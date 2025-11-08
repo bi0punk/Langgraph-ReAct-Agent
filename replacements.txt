@@ -1,0 +1,2 @@
+sk-[A-Za-z0-9_\-]{20,} REDACTED
+(?i)OPENAI_API_KEY\s*=\s*\S+ OPENAI_API_KEY=REDACTED
