@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
-from langchain.agents import create_agent as create_react_agent
 
+from langgraph.prebuilt import create_react_agent
 
 from langchain_core.messages import HumanMessage, SystemMessage
 

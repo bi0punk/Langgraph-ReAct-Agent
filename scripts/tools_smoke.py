@@ -1,3 +1,5 @@
+# pytest: skip-file
+
 #!/usr/bin/env python3
 # scripts/test_tools.py
 # ------------------------------------------------------------
