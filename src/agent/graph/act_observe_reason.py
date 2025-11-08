@@ -29,6 +29,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from ..state import AgentState, DEFAULT_MAX_STEPS
 
 
+
+
+
 def build_act_observe_reason_graph(
     prompt: ChatPromptTemplate,
     llm_act,          # ChatModel con tools:   llm.bind_tools(TOOLS)
@@ -117,6 +120,8 @@ def build_act_observe_reason_graph(
         last = state["messages"][-1]
         has_calls = bool(getattr(last, "tool_calls", None))
         return "act" if has_calls else "end"
+
+
 
     # -----------------------------
     # ENSAMBLA EL GRAFO
