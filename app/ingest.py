@@ -1,74 +1,74 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
+import logging
 from pathlib import Path
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from app.config import settings
 from app.embeddings import get_embeddings
-from app.config import DOCS_DIR, VECTORSTORE_DIR
 
-def load_documents():
+logger = logging.getLogger(__name__)
+
+
+def load_pdfs(docs_path: Path) -> list:
+    pdf_files = list(docs_path.glob("*.pdf"))
+    if not pdf_files:
+        logger.warning("No PDF files found in %s", docs_path)
+        return []
+
     docs = []
-    docs_path = Path(DOCS_DIR)
-
-    if not docs_path.exists():
-        raise RuntimeError(f"Docs directory not found: {DOCS_DIR}")
-
-    for file in docs_path.glob("*"):
-        if file.suffix.lower() == ".pdf":
-            print(f"📄 Loading PDF: {file}")
-            loader = PyPDFLoader(str(file))
-            docs.extend(loader.load())
-
-        elif file.suffix.lower() in [".txt", ".md"]:
-            print(f"📄 Loading text: {file}")
-            loader = TextLoader(str(file))
-            docs.extend(loader.load())
-
+    for pdf_file in pdf_files:
+        try:
+            loader = PyPDFLoader(str(pdf_file))
+            pages = loader.load()
+            docs.extend(pages)
+            logger.info("Loaded %s — %d pages", pdf_file.name, len(pages))
+        except Exception as e:
+            logger.error("Failed to load %s: %s", pdf_file.name, e)
     return docs
 
 
-def ingest():
-    print("🚀 Starting ingestion pipeline...")
-
-    docs = load_documents()
-
-    if not docs:
-        raise RuntimeError("❌ No documents loaded. Check data/docs content.")
-
-    print(f"✅ Loaded {len(docs)} raw pages")
-
+def split_documents(docs: list) -> list:
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=120
+        chunk_size=settings.rag_chunk_size,
+        chunk_overlap=settings.rag_chunk_overlap,
     )
+    return splitter.split_documents(docs)
 
-    chunks = splitter.split_documents(docs)
 
-    if not chunks:
-        raise RuntimeError("❌ No chunks generated")
+def build_vectorstore(split_docs: list):
+    embeddings = get_embeddings()
+    logger.info("Building FAISS index from %d chunks...", len(split_docs))
+    return FAISS.from_documents(split_docs, embeddings)
 
-    print(f"🧩 Generated {len(chunks)} chunks")
 
-    embedding_model = get_embeddings()
+def save_vectorstore(vectorstore, path: Path):
+    path.mkdir(parents=True, exist_ok=True)
+    vectorstore.save_local(str(path))
+    logger.info("Vectorstore saved to %s", path)
 
-    texts = [c.page_content for c in chunks]
 
-    print("🧠 Generating embeddings...")
-    vectors = embedding_model.embed_documents(texts)
+def main():
+    docs_path = settings.docs_path
+    vectorstore_path = settings.vectorstore_path
 
-    print("📦 Building FAISS index...")
-    db = FAISS.from_embeddings(
-        text_embeddings=list(zip(texts, vectors)),
-        embedding=embedding_model
-    )
+    logger.info("Ingesting PDFs from %s", docs_path)
+    docs_path.mkdir(parents=True, exist_ok=True)
 
-    VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
-    db.save_local(str(VECTORSTORE_DIR))
+    docs = load_pdfs(docs_path)
+    if not docs:
+        logger.error("No documents loaded — aborting")
+        return
 
-    print(f"✅ Vectorstore saved to: {VECTORSTORE_DIR}")
+    split_docs = split_documents(docs)
+    logger.info("Created %d chunks", len(split_docs))
+
+    vectorstore = build_vectorstore(split_docs)
+    save_vectorstore(vectorstore, vectorstore_path)
+    logger.info("Ingestion complete")
 
 
 if __name__ == "__main__":
-    ingest()
+    logging.basicConfig(level=logging.INFO)
+    main()

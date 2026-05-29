@@ -1,40 +1,34 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from pathlib import Path
 
-# =========================
-# PROJECT ROOT
-# =========================
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# =========================
-# DATA PATHS
-# =========================
-DATA_DIR = PROJECT_ROOT / "data"
-DOCS_DIR = DATA_DIR / "docs"
 
-VECTORSTORE_DIR = PROJECT_ROOT / "vectorstore" / "faiss_index"
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
-LOGS_DIR = PROJECT_ROOT / "logs"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+    openai_base_url: str = ""
 
-# =========================
-# EMBEDDINGS CONFIG
-# =========================
-EMBEDDING_MODEL_NAME = "intfloat/e5-small"
+    docs_path: Path = Path("data/docs")
+    vectorstore_path: Path = Path("vectorstore/faiss_index")
+    rag_top_k: int = 4
+    rag_chunk_size: int = 1000
+    rag_chunk_overlap: int = 150
+    rag_mode: str = "both"
+    max_rewrites: int = 2
 
-# =========================
-# LLM CONFIG (GGUF / llama.cpp)
-# =========================
-LLAMA_CPP_PATH = Path("/home/drbash/Documentos/auto-local-llm/llama.cpp")
+    checkpointer: str = "memory"
+    checkpoint_db: str = "data/checkpoints.sqlite"
 
-MODELS_DIR = Path("/home/drbash/Documentos/auto-local-llm/models")
+    log_level: str = "INFO"
 
-DEFAULT_GGUF_MODEL = MODELS_DIR / "Qwen2.5-14B-Instruct.Q4_K_M.gguf"
+    thread_id: str = "cli-session-1"
+    embedding_model: str = "intfloat/e5-small"
 
-# =========================
-# PERFORMANCE LIMITS (CPU SAFE)
-# =========================
-MAX_CPU_THREADS = 4
-MAX_CONTEXT_TOKENS = 4096
-MAX_BATCH_SIZE = 8
+
+settings = Settings()

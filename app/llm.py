@@ -1,18 +1,18 @@
-from llama_cpp import Llama
-from app.config import MODEL_PATH, N_THREADS, N_CTX, N_BATCH
+from langchain_openai import ChatOpenAI
 
-assert MODEL_PATH.exists(), f"Model not found: {MODEL_PATH}"
+from app.config import settings
 
-llm = Llama(
-    model_path=str(MODEL_PATH),
-    n_ctx=N_CTX,
-    n_threads=N_THREADS,
-    n_gpu_layers=0,  # CPU ONLY
-    n_batch=N_BATCH,
-    use_mmap=True,
-    use_mlock=False,
-    temperature=0.2,
-    top_p=0.9,
-    repeat_penalty=1.1,
-    verbose=False,
-)
+_instance = None
+
+
+def get_llm():
+    global _instance
+    if _instance is None:
+        _instance = ChatOpenAI(
+            model=settings.openai_model,
+            api_key=settings.openai_api_key or None,
+            base_url=settings.openai_base_url or None,
+            temperature=0,
+            streaming=True,
+        )
+    return _instance
