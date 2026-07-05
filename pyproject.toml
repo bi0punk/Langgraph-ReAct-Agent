@@ -1,12 +1,12 @@
 [build-system]
 requires = ["setuptools>=64"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "langgraph-rag-pipeline"
 version = "2.0.0"
 description = "Corrective RAG pipeline with LangGraph"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "langchain>=0.3,<1.0",
     "langchain-community>=0.3,<1.0",
@@ -20,8 +20,27 @@ dependencies = [
     "sentence-transformers>=3.0,<4.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.6.0",
+]
+
 [project.scripts]
 langgraph-rag = "app.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
