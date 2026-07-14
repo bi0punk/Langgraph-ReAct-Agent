@@ -14,5 +14,7 @@ def get_llm():
             base_url=settings.openai_base_url or None,
             temperature=0,
             streaming=True,
+            timeout=60,
+            max_retries=2,
         )
     return _instance

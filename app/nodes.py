@@ -76,8 +76,12 @@ def grade_node(state: AgentState) -> dict:
         question=state["question"],
         documents=docs_text,
     )
-    response = llm.invoke(prompt)
-    content = response.content.strip().lower()
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip().lower()
+    except Exception as e:
+        logger.error("LLM grading failed: %s", e)
+        return {"grade": "not_relevant"}
 
     try:
         parsed = json.loads(content)
@@ -92,8 +96,12 @@ def grade_node(state: AgentState) -> dict:
 def rewrite_node(state: AgentState) -> dict:
     llm = get_llm()
     prompt = REWRITE_TEMPLATE.format_messages(question=state["question"])
-    response = llm.invoke(prompt)
-    new_query = response.content.strip()
+    try:
+        response = llm.invoke(prompt)
+        new_query = response.content.strip()
+    except Exception as e:
+        logger.error("LLM rewrite failed: %s", e)
+        return {"question": state["question"], "rewrite_count": state.get("rewrite_count", 0) + 1}
     logger.info("Rewrote query: '%s' -> '%s'", state["question"], new_query)
     return {"question": new_query, "rewrite_count": state.get("rewrite_count", 0) + 1}
 
@@ -111,9 +119,13 @@ def generate_node(state: AgentState, config: RunnableConfig | None = None) -> di
         context=context,
         question=state["question"],
     )
-    response = llm.invoke(prompt, config=config if config else None)
-    logger.info("Generated answer (%d chars)", len(response.content))
-    return {"generation": response.content, "messages": [AIMessage(content=response.content)]}
+    try:
+        response = llm.invoke(prompt, config=config if config else None)
+        logger.info("Generated answer (%d chars)", len(response.content))
+        return {"generation": response.content, "messages": [AIMessage(content=response.content)]}
+    except Exception as e:
+        logger.error("LLM generation failed: %s", e)
+        return {"generation": "Lo siento, ocurrió un error al generar la respuesta.", "messages": []}
 
 
 def generate_with_tools_node(state: AgentState, llm, config: RunnableConfig | None = None) -> dict:
