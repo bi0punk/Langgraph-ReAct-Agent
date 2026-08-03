@@ -12,3 +12,4 @@ data/checkpoints.sqlite
 .ruff_cache/
 .mypy_cache/
 *.log
+*.pdf
