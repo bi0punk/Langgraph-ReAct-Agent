@@ -60,7 +60,7 @@ Langgraph-ReAct-Agent/
 ## Instalación
 
 ```bash
-git clone https://github.com/tu-usuario/Langgraph-ReAct-Agent.git
+git clone https://github.com/bi0punk/Langgraph-ReAct-Agent.git
 cd Langgraph-ReAct-Agent
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
