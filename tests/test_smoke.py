@@ -28,19 +28,19 @@ def test_create_pipeline_shape():
 
 def test_no_pdf_tracked():
     """El manual.pdf no debe commitearse."""
-    import subprocess
+    import subprocess  # nosec B404
 
-    tracked = subprocess.run(
-        ["git", "ls-files"], cwd=Path(__file__).resolve().parent.parent,
-        capture_output=True, text=True, check=True
+    tracked = subprocess.run(  # nosec B603, B607
+        ["git", "ls-files"], cwd=Path(__file__).resolve().parent.parent, capture_output=True, text=True, check=True
     ).stdout
-    pdfs = [l for l in tracked.splitlines() if l.endswith(".pdf")]
+    pdfs = [line for line in tracked.splitlines() if line.endswith(".pdf")]
     assert not pdfs, f"PDFs commiteados: {pdfs}"
 
 
 @pytest.fixture
 def settings():
     from app.config import Settings
+
     return Settings()
 
 

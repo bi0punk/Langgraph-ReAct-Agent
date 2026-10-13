@@ -16,6 +16,7 @@ def setup_logging() -> None:
     handler.setFormatter(formatter)
 
     from pathlib import Path
+
     log_dir = Path("logs")
     log_dir.mkdir(parents=True, exist_ok=True)
     file_handler = logging.FileHandler(str(log_dir / "app.log"), encoding="utf-8")

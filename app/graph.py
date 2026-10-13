@@ -6,6 +6,7 @@ from langgraph.prebuilt import ToolNode
 
 try:
     from langgraph.checkpoint.sqlite import SqliteSaver
+
     HAS_SQLITE = True
 except ImportError:
     HAS_SQLITE = False
@@ -78,10 +79,14 @@ def _build_react_agent():
     workflow.add_node("tools", tool_node)
 
     workflow.set_entry_point("agent")
-    workflow.add_conditional_edges("agent", should_continue, {
-        "continue": "tools",
-        "end": END,
-    })
+    workflow.add_conditional_edges(
+        "agent",
+        should_continue,
+        {
+            "continue": "tools",
+            "end": END,
+        },
+    )
     workflow.add_edge("tools", "agent")
 
     memory = _get_checkpointer()
@@ -98,10 +103,14 @@ def _build_rag_pipeline():
 
     workflow.set_entry_point("retrieve")
     workflow.add_edge("retrieve", "grade")
-    workflow.add_conditional_edges("grade", grade_router, {
-        "generate": "generate",
-        "rewrite": "rewrite",
-    })
+    workflow.add_conditional_edges(
+        "grade",
+        grade_router,
+        {
+            "generate": "generate",
+            "rewrite": "rewrite",
+        },
+    )
     workflow.add_edge("rewrite", "retrieve")
     workflow.add_edge("generate", END)
 
@@ -124,15 +133,23 @@ def _build_both_pipeline():
 
     workflow.set_entry_point("retrieve")
     workflow.add_edge("retrieve", "grade")
-    workflow.add_conditional_edges("grade", grade_router, {
-        "generate": "generate",
-        "rewrite": "rewrite",
-    })
+    workflow.add_conditional_edges(
+        "grade",
+        grade_router,
+        {
+            "generate": "generate",
+            "rewrite": "rewrite",
+        },
+    )
     workflow.add_edge("rewrite", "retrieve")
-    workflow.add_conditional_edges("generate", should_continue, {
-        "continue": "tools",
-        "end": END,
-    })
+    workflow.add_conditional_edges(
+        "generate",
+        should_continue,
+        {
+            "continue": "tools",
+            "end": END,
+        },
+    )
     workflow.add_edge("tools", "generate")
 
     memory = _get_checkpointer()
@@ -142,6 +159,7 @@ def _build_both_pipeline():
 def _get_checkpointer():
     if settings.checkpointer == "sqlite" and HAS_SQLITE:
         import sqlite3
+
         settings.checkpoint_db.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(str(settings.checkpoint_db), check_same_thread=False)
         return SqliteSaver(conn)

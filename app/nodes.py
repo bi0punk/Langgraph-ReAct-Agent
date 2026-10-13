@@ -5,48 +5,62 @@ from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables.config import RunnableConfig
 
-from app.config import settings
 from app.llm import get_llm
 from app.models import AgentState
 from app.retriever import get_retriever
 
 logger = logging.getLogger(__name__)
 
-GRADE_TEMPLATE = ChatPromptTemplate.from_messages([
-    ("system", (
-        "You are a grader evaluating whether retrieved documents are relevant "
-        "to the user's question.\n\n"
-        "Examples:\n"
-        "Question: What is the return policy?\n"
-        "Documents: [text about 30-day return policy, refund process]\n"
-        "Relevant: true\n\n"
-        "Question: What is the capital of France?\n"
-        "Documents: [text about laptop specifications]\n"
-        "Relevant: false\n\n"
-        "Respond with ONLY a JSON object: {{\"relevant\": true}} or {{\"relevant\": false}}."
-    )),
-    ("human", "Question: {question}\n\nRetrieved documents:\n{documents}"),
-])
+GRADE_TEMPLATE = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            (
+                "You are a grader evaluating whether retrieved documents are relevant "
+                "to the user's question.\n\n"
+                "Examples:\n"
+                "Question: What is the return policy?\n"
+                "Documents: [text about 30-day return policy, refund process]\n"
+                "Relevant: true\n\n"
+                "Question: What is the capital of France?\n"
+                "Documents: [text about laptop specifications]\n"
+                "Relevant: false\n\n"
+                'Respond with ONLY a JSON object: {{"relevant": true}} or {{"relevant": false}}.'
+            ),
+        ),
+        ("human", "Question: {question}\n\nRetrieved documents:\n{documents}"),
+    ]
+)
 
-REWRITE_TEMPLATE = ChatPromptTemplate.from_messages([
-    ("system", (
-        "You are a query rewriter. Given a user question and a failed search result, "
-        "rewrite the question to be more specific and searchable. "
-        "Respond with only the rewritten question, nothing else."
-    )),
-    ("human", "Original question: {question}\n\nPrevious search returned irrelevant results.\nRewritten question:"),
-])
+REWRITE_TEMPLATE = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            (
+                "You are a query rewriter. Given a user question and a failed search result, "
+                "rewrite the question to be more specific and searchable. "
+                "Respond with only the rewritten question, nothing else."
+            ),
+        ),
+        ("human", "Original question: {question}\n\nPrevious search returned irrelevant results.\nRewritten question:"),
+    ]
+)
 
-GENERATE_TEMPLATE = ChatPromptTemplate.from_messages([
-    ("system", (
-        "You are a helpful assistant. Answer the user's question based on the "
-        "provided context and conversation history. If the context doesn't contain "
-        "enough information, say so clearly. Be concise and accurate.\n\n"
-        "Conversation history:\n{history}\n\n"
-        "Context:\n{context}"
-    )),
-    ("human", "{question}"),
-])
+GENERATE_TEMPLATE = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            (
+                "You are a helpful assistant. Answer the user's question based on the "
+                "provided context and conversation history. If the context doesn't contain "
+                "enough information, say so clearly. Be concise and accurate.\n\n"
+                "Conversation history:\n{history}\n\n"
+                "Context:\n{context}"
+            ),
+        ),
+        ("human", "{question}"),
+    ]
+)
 
 
 def retrieve_node(state: AgentState) -> dict:

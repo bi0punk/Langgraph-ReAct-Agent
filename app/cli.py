@@ -23,7 +23,7 @@ class TokenPrinter(BaseCallbackHandler):
     def __init__(self):
         self.seen_first = False
 
-    def on_llm_new_token(self, token: str, **kwargs):
+    def on_llm_new_token(self, token: str, **_kwargs):
         if not self.seen_first:
             print(f"\n{B}Assistant:{RESET} ", end="", flush=True)
             self.seen_first = True
@@ -31,7 +31,7 @@ class TokenPrinter(BaseCallbackHandler):
 
 
 def clear():
-    os.system("cls" if os.name == "nt" else "clear")
+    os.system("cls" if os.name == "nt" else "clear")  # nosec B605
 
 
 def print_help():
@@ -156,6 +156,7 @@ def main():
                 show_history(pipeline, thread_id)
             elif cmd == "/new":
                 import uuid
+
                 thread_id = str(uuid.uuid4())
                 print(f"{C}New thread: {thread_id}{RESET}")
             else:

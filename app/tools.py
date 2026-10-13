@@ -16,10 +16,7 @@ def retrieve_documents(query: str) -> str:
         docs = retriever.invoke(query)
         if not docs:
             return "No relevant documents found."
-        result = "\n\n---\n\n".join(
-            f"[Source: {d.metadata.get('source', 'unknown')}]\n{d.page_content}"
-            for d in docs
-        )
+        result = "\n\n---\n\n".join(f"[Source: {d.metadata.get('source', 'unknown')}]\n{d.page_content}" for d in docs)
         return result
     except FileNotFoundError:
         return "Error: Vectorstore not found. Please run 'python -m app.ingest' first."

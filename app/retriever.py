@@ -19,8 +19,6 @@ def get_retriever():
             logger.error("Vectorstore not found at %s — run ingest.py first", path)
             raise FileNotFoundError(f"Vectorstore not found at {path}")
 
-        persist_dir = path.parent
-        integrity_file = persist_dir / ".faiss_integrity"
         allow_dangerous = os.getenv("FAISS_ALLOW_DANGEROUS", "false").lower() == "true"
         if not allow_dangerous:
             logger.warning(
