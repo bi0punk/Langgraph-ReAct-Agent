@@ -159,7 +159,10 @@ pytest -q
 ruff check .
 ```
 
-No hay workflow de CI en `.github/workflows` para este repositorio.
+CI — GitHub Actions (`.github/workflows/ci.yml`) sobre Python 3.12, en push/PR a `main`/`master`/`dev`:
+
+- **lint** — `ruff check .`.
+- **smoke** — `pytest tests/test_smoke.py -q` tras instalar `requirements.txt`.
 
 ## Roadmap
 
